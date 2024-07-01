@@ -12,6 +12,9 @@ import matplotlib.pyplot as plt
 os.makedirs("output", exist_ok=True)
 os.makedirs("output/vae_generated_images", exist_ok=True)
 
+# Use Agg backend for matplotlib
+plt.switch_backend('Agg')
+
 def build_and_train_vae(latent_space_dim, input_dim=28*28, hidden_layer_size=64, batch_size_value=100, training_epochs=50, epsilon_standard=1.0):
     """
     Build and train a Variational Autoencoder.
@@ -100,7 +103,7 @@ def optuna_objective(trial):
     plt.ylabel('Loss')
     plt.legend()
     plt.savefig(f"output/loss_curve_trial_{trial.number}_latent_dim_{latent_dimension}.png")
-    plt.show()
+    plt.close()
 
     # Plotting and saving latent space visualization
     encoded_test = encoder.predict(x_test)
@@ -111,7 +114,7 @@ def optuna_objective(trial):
     plt.xlabel('z_1')
     plt.ylabel('z_2' if latent_dimension > 1 else '')
     plt.savefig(f"output/latent_space_trial_{trial.number}_latent_dim_{latent_dimension}.png")
-    plt.show()
+    plt.close()
 
     # Generating and saving images for digits 0-9
     plt.figure(figsize=(20, 4))
@@ -123,7 +126,6 @@ def optuna_objective(trial):
         plt.imshow(digit_image, cmap='gray')
         plt.axis('off')
     plt.savefig(f"output/vae_generated_images/vae_digits_trial_{trial.number}_latent_dim_{latent_dimension}.png")
-    plt.show()
     plt.close()
 
     return history.history['val_loss'][-1]
@@ -133,4 +135,4 @@ optuna_study = optuna.create_study(direction='minimize')
 optuna_study.optimize(optuna_objective, n_trials=5)
 
 # Reporting best latent dimension size
-print("Best Latent Dimension Size:", optuna_study.best_params['latent_dimension'])
+print("Best Latent Dimension Size:", optuna_study.best_params['latent_dimension']) 
